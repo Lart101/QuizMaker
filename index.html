@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Quiz Maker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="mt-5">AI-Powered Quiz Maker</h1>
+    <p id="output-field">Enter a topic or upload a document to generate quiz questions:</p>
+    
+    <div class="input-group mt-3">
+        <input type="text" id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input">
+        <input type="file" id="file-input" accept=".txt,.pdf" style="display:none;">
+        <button id="file-btn" class="btn btn-secondary">Upload File</button>
+        <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>
+    </div>
+    
+    <div id="quiz-output" class="mt-4"></div>
+    <div id="loading" class="mt-3" style="display: none;">Generating quiz, please wait...</div>
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
+}
+</script>
+
+<script type="module">
+    import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+
+    const API_KEY = 'AIzaSyADPuz_i2269SvSA91wwU1sf9b6UxIl3fA'; // Replace with your Gemini API key
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    let chat;
+
+    const safetySettings = [
+        {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+    ];
+
+    async function initializeChat(topic) {
+        const promptText = `You are a knowledgeable and engaging quiz master. Generate a multiple-choice quiz on the topic: ${topic}.
+Follow this format strictly:
+    Question Title: [Insert the question here]
+    Options: [Option A, Option B, Option C, Option D]
+    Correct Answer: [Correct answer]  With 5 Question
+
+BE DIRECT DONT ADD ANY UNNESSARY WORDS  EXAMPLE FORMAT:
+Question Title: What is the capital of France?
+Options: Paris, London, Rome, Berlin
+Correct Answer: Paris
+
+Question Title: Which planet is closest to the sun?
+Options: Earth, Venus, Mercury, Mars
+Correct Answer: Mercury
+`;
+
+        chat = await genAI.getGenerativeModel({ model: "gemini-pro", safetySettings }).startChat({
+            history: [{ role: "user", parts: [{ text: promptText }] }],
+            generationConfig: { maxOutputTokens: 2000 },
+        });
+    }
+
+    async function generateQuiz(topic) {
+        if (!chat) {
+            await initializeChat(topic);
+        }
+
+        const model = chat;
+
+        try {
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            console.log("Generating quiz for topic:", topic); // Debugging output
+
+            const result = await model.sendMessage(`You are a knowledgeable and engaging quiz master. Generate a multiple-choice quiz on the topic: ${topic}.
+Follow this format strictly:
+    Question Title: [Insert the question here]
+    Options: [Option A, Option B, Option C, Option D]
+    Correct Answer: [Correct answer]  With 5 Question
+
+BE DIRECT DONT ADD ANY UNNESSARY WORDS  EXAMPLE FORMAT:
+Question Title: What is the capital of France?
+Options: Paris, London, Rome, Berlin
+Correct Answer: Paris
+
+Question Title: Which planet is closest to the sun?
+Options: Earth, Venus, Mercury, Mars
+Correct Answer: Mercury
+`);
+            const response = await result.response;
+
+            console.log("Response received:", response); // Debugging output
+
+            if (response) {
+                const quizText = await response.text();
+                console.log("Quiz text received:", quizText); // Debugging output
+                renderQuiz(quizText); // Changed to renderQuiz
+            } else {
+                displayQuiz("This content is not safe for display based on current settings.");
+            }
+        } catch (error) {
+            console.error("Error generating quiz:", error);
+            displayQuiz("An error occurred while generating the quiz.");
+        } finally {
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function renderQuiz(quizText) {
+        // Parse the quizText into a structured format
+        const questions = [];
+        const inputLines = quizText.split("\n");
+
+        let currentQuestion = null;
+
+        inputLines.forEach(line => {
+            if (line.startsWith("Question Title:")) {
+                if (currentQuestion) {
+                    questions.push(currentQuestion); // Save the last question
+                }
+                currentQuestion = { title: line.replace("Question Title: ", ""), options: [], correctAnswer: "" };
+            } else if (line.startsWith("Options:")) {
+                currentQuestion.options = line.replace("Options: ", "").split(", ");
+            } else if (line.startsWith("Correct Answer:")) {
+                currentQuestion.correctAnswer = line.replace("Correct Answer: ", "");
+            }
+        });
+
+        if (currentQuestion) {
+            questions.push(currentQuestion); // Push the last question
+        }
+
+        // Render the quiz to the page
+        const quizContainer = document.getElementById("quiz-output");
+        quizContainer.innerHTML = ""; // Clear any previous quiz
+
+        questions.forEach((question, questionIndex) => {
+            const questionDiv = document.createElement("div");
+            questionDiv.className = "quiz-question";
+
+            const questionTitle = document.createElement("div");
+            questionTitle.className = "question";
+            questionTitle.textContent = `${questionIndex + 1}. ${question.title}`;
+            questionDiv.appendChild(questionTitle);
+
+            const optionsList = document.createElement("ul");
+            optionsList.className = "options";
+
+            question.options.forEach(option => {
+                const optionItem = document.createElement("li");
+                const optionInput = document.createElement("input");
+                optionInput.type = "radio";
+                optionInput.name = `question${questionIndex}`;
+                optionInput.value = option; // Option value
+
+                const optionLabel = document.createElement("label");
+                optionLabel.textContent = option;
+
+                optionItem.appendChild(optionInput);
+                optionItem.appendChild(optionLabel);
+                optionsList.appendChild(optionItem);
+            });
+
+            questionDiv.appendChild(optionsList);
+            quizContainer.appendChild(questionDiv);
+        });
+    }
+
+    document.getElementById('generate-quiz-btn').addEventListener('click', () => {
+        const topic = document.getElementById('topic-input').value.trim();
+        if (topic) {
+            generateQuiz(topic);
+        } else {
+            alert("Please enter a topic before generating a quiz.");
+        }
+    });
+
+    document.getElementById('file-btn').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileContent = await file.text();
+            generateQuiz(fileContent);
+        }
+    });
+</script>
+
+</body>
+</html>

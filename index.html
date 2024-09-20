@@ -6,28 +6,64 @@
     <title>AI-Powered Quiz Maker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+        }
         .quiz-question {
             margin-bottom: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        .options input {
+            margin-right: 10px;
+        }
+        #loading {
+            color: #007bff;
+        }
+        #score-output {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 class="mt-5">AI-Powered Quiz Maker</h1>
+    <h1 class="text-center mb-4">AI-Powered Quiz Maker</h1>
     <p id="output-field">Enter a topic or upload a document to generate quiz questions:</p>
     
-    <div class="input-group mt-3">
+    <div class="input-group mb-4">
         <input type="text" id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input">
         <input type="file" id="file-input" accept=".txt,.pdf" style="display:none;">
         <button id="file-btn" class="btn btn-secondary">Upload File</button>
         <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>
     </div>
     
-    <div id="quiz-output" class="mt-4"></div>
-    <div id="loading" class="mt-3" style="display: none;">Generating quiz, please wait...</div>
+    <div id="quiz-output"></div>
+    <div id="loading" style="display: none;">Generating quiz, please wait...</div>
     <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">Submit Answers</button>
-    <div id="score-output" class="mt-4"></div>
+    <div id="score-output"></div>
 </div>
 
 <script type="importmap">
@@ -55,8 +91,6 @@
     let questions = []; // Store questions and answers
 
     async function initializeChat(topic) {
-      
-
         chat = await genAI.getGenerativeModel({ model: "gemini-1.5-pro", safetySettings }).startChat({
             history: [{ role: "user", parts: [{ text: `You are a knowledgeable and engaging quiz master. Generate a multiple-choice quiz on the topic: ${topic}.
 Follow this format strictly:
@@ -72,12 +106,14 @@ Correct Answer: Paris
 Question Title: Which planet is closest to the sun?
 Options: Earth, Venus, Mercury, Mars
 Correct Answer: Mercury
-` }] }],
-            generationConfig: {  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain", },
+` }] } ],
+            generationConfig: {  
+                temperature: 1,
+                topP: 0.95,
+                topK: 64,
+                maxOutputTokens: 8192,
+                responseMimeType: "text/plain",
+            },
         });
     }
 
@@ -115,7 +151,7 @@ Correct Answer: Mercury
             if (response) {
                 const quizText = await response.text();
                 console.log("Quiz text received:", quizText); // Debugging output
-                renderQuiz(quizText); // Changed to renderQuiz
+                renderQuiz(quizText);
             } else {
                 displayQuiz("This content is not safe for display based on current settings.");
             }
@@ -161,7 +197,7 @@ Correct Answer: Mercury
             questionDiv.className = "quiz-question";
 
             const questionTitle = document.createElement("div");
-            questionTitle.className = "question";
+            questionTitle.className = "question fw-bold";
             questionTitle.textContent = `${questionIndex + 1}. ${question.title}`;
             questionDiv.appendChild(questionTitle);
 

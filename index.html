@@ -9,7 +9,6 @@
         .quiz-question {
             margin-bottom: 20px;
         }
-        
     </style>
 </head>
 <body>
@@ -27,6 +26,8 @@
     
     <div id="quiz-output" class="mt-4"></div>
     <div id="loading" class="mt-3" style="display: none;">Generating quiz, please wait...</div>
+    <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">Submit Answers</button>
+    <div id="score-output" class="mt-4"></div>
 </div>
 
 <script type="importmap">
@@ -51,8 +52,13 @@
         },
     ];
 
+    let questions = []; // Store questions and answers
+
     async function initializeChat(topic) {
-        const promptText = `You are a knowledgeable and engaging quiz master. Generate a multiple-choice quiz on the topic: ${topic}.
+      
+
+        chat = await genAI.getGenerativeModel({ model: "gemini-1.5-pro", safetySettings }).startChat({
+            history: [{ role: "user", parts: [{ text: `You are a knowledgeable and engaging quiz master. Generate a multiple-choice quiz on the topic: ${topic}.
 Follow this format strictly:
     Question Title: [Insert the question here]
     Options: [Option A, Option B, Option C, Option D]
@@ -66,11 +72,12 @@ Correct Answer: Paris
 Question Title: Which planet is closest to the sun?
 Options: Earth, Venus, Mercury, Mars
 Correct Answer: Mercury
-`;
-
-        chat = await genAI.getGenerativeModel({ model: "gemini-1.0-pro", safetySettings }).startChat({
-            history: [{ role: "user", parts: [{ text: promptText }] }],
-            generationConfig: { maxOutputTokens: 30000 },
+` }] }],
+            generationConfig: {  temperature: 1,
+  topP: 0.95,
+  topK: 64,
+  maxOutputTokens: 8192,
+  responseMimeType: "text/plain", },
         });
     }
 
@@ -123,7 +130,7 @@ Correct Answer: Mercury
 
     function renderQuiz(quizText) {
         // Parse the quizText into a structured format
-        const questions = [];
+        questions = []; // Clear previous questions
         const inputLines = quizText.split("\n");
 
         let currentQuestion = null;
@@ -179,6 +186,29 @@ Correct Answer: Mercury
             questionDiv.appendChild(optionsList);
             quizContainer.appendChild(questionDiv);
         });
+
+        // Show the Submit button after rendering the quiz
+        document.getElementById('submit-quiz-btn').style.display = 'block';
+    }
+
+    function calculateScore() {
+        let score = 0;
+        const scoreOutput = document.getElementById('score-output');
+        scoreOutput.innerHTML = ""; // Clear previous score output
+
+        questions.forEach((question, questionIndex) => {
+            const selectedOption = document.querySelector(`input[name="question${questionIndex}"]:checked`);
+            if (selectedOption && selectedOption.value === question.correctAnswer) {
+                score++;
+            }
+
+            // Display correct answer
+            const answerDiv = document.createElement("div");
+            answerDiv.textContent = `${questionIndex + 1}. ${question.title} - Correct Answer: ${question.correctAnswer}`;
+            scoreOutput.appendChild(answerDiv);
+        });
+
+        scoreOutput.prepend(`Your score: ${score} out of ${questions.length}`);
     }
 
     document.getElementById('generate-quiz-btn').addEventListener('click', () => {
@@ -201,6 +231,8 @@ Correct Answer: Mercury
             generateQuiz(fileContent);
         }
     });
+
+    document.getElementById('submit-quiz-btn').addEventListener('click', calculateScore);
 </script>
 
 </body>

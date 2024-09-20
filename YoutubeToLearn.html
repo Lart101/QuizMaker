@@ -61,7 +61,7 @@
    
     <div class="mb-4">
         <label for="question-input" class="form-label">Input Questions (Max 100):</label>
-<input type="number" id="question-input" class="form-control" placeholder="Enter your range here..." min="1" max="100" required oninput="this.value = Math.max(1, Math.min(100, this.value));">
+<input type="number" id="question-input" class="form-control" placeholder="Enter your range here..." min="1" max="100" required oninput="this.value = Math.max(0, Math.min(100, this.value));">
 <small class="form-text text-muted">You can enter a number between 1 and 100.</small>
 
 
@@ -278,6 +278,8 @@ Correct Answer: Mercury
 
     });
     const questionInput = document.getElementById('question-input');
+
+
 
    
     document.getElementById('file-btn').addEventListener('click', () => {

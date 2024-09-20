@@ -9,6 +9,7 @@
         .quiz-question {
             margin-bottom: 20px;
         }
+        
     </style>
 </head>
 <body>
@@ -67,9 +68,9 @@ Options: Earth, Venus, Mercury, Mars
 Correct Answer: Mercury
 `;
 
-        chat = await genAI.getGenerativeModel({ model: "gemini-pro", safetySettings }).startChat({
+        chat = await genAI.getGenerativeModel({ model: "gemini-1.0-pro", safetySettings }).startChat({
             history: [{ role: "user", parts: [{ text: promptText }] }],
-            generationConfig: { maxOutputTokens: 2000 },
+            generationConfig: { maxOutputTokens: 30000 },
         });
     }
 

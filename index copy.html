@@ -39,7 +39,23 @@
             margin-right: 10px;
         }
         #loading {
-            color: #007bff;
+            display: none;
+            margin-top: 20px;
+        }
+        #loading-bar {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+            display: none; /* Initially hidden */
+        }
+        #loading-progress {
+            width: 0%;
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.2s ease;
         }
         #score-output {
             margin-top: 20px;
@@ -58,30 +74,33 @@
         <textarea id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input" rows="4" cols="50" required></textarea>
     </div>
     
-   
     <div class="mb-4">
         <label for="question-input" class="form-label">Input Questions (Max 100):</label>
-<input type="number" id="question-input" class="form-control" placeholder="Enter your range here..." min="1" max="100" required oninput="this.value = Math.max(1, Math.min(100, this.value));">
-<small class="form-text text-muted">You can enter a number between 1 and 100.</small>
-
-
-        <small class="form-text text-muted">You can enter up to 100 questions, one per line.</small>
-    </div>
-    <div id="loading-screen" style="display:none; text-align: center; margin-top: 20px;">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Scanning Text...</p>
-    </div>
-    <div class="input-group mb-4">
-        <input type="file" id="file-input" accept=".txt,.pdf" style="display:none;">
-        <button id="file-btn" class="btn btn-secondary">Upload File</button>
-        <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>
+        <input type="number" id="question-input" class="form-control" placeholder="Enter your range here..." min="1" max="100" required oninput="this.value = Math.max(1, Math.min(100, this.value));">
+        <small class="form-text text-muted">You can enter a number between 1 and 100.</small>
     </div>
     
-    
-    <div id="quiz-output"></div>
+  <!-- Add a loading screen -->
+<div id="loading-screen" style="display:none; text-align: center; margin-top: 20px;">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Scanning Text...</p>
+</div>
+
+<!-- File input and buttons -->
+<div class="input-group mb-4">
+    <input type="file" id="file-input" accept=".txt,.pdf" style="display:none;">
+    <button id="file-btn" class="btn btn-secondary">Upload File</button>
+    <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>
+</div>
+
+
     <div id="loading" style="display: none;">Generating quiz, please wait...</div>
+    <div id="loading-bar">
+        <div id="loading-progress"></div>
+    </div>
+    <div id="quiz-output"></div>
     <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">Submit Answers</button>
     <div id="score-output"></div>
 </div>
@@ -95,10 +114,6 @@
 </script>
 
 <script type="module">
-   
-
-   
-
     import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 
     const API_KEY = 'AIzaSyCW-qGbbyLBerWcUMUu-mAa7-NnSfSrFpc'; 
@@ -114,23 +129,9 @@
 
     let questions = []; // Store questions and answers
 
-    async function initializeChat(topic,questionRange) {
+    async function initializeChat(topic, questionRange) {
         chat = await genAI.getGenerativeModel({ model: "gemini-1.5-pro", safetySettings }).startChat({
-            history: [{ role: "user", parts: [{ text: `You are a knowledgeable and engaging quiz master. Generate a  ${questionRange} Question  multiple-choice quiz on the topic: ${topic}.
-Follow this format strictly:
-    Question Title: [Insert the question here]
-    Options: [Option A, Option B, Option C, Option D]
-    Correct Answer: [Correct answer] 
-
-BE DIRECT DONT ADD ANY UNNESSARY WORDS  EXAMPLE FORMAT:
-Question Title: What is the capital of France?
-Options: Paris, London, Rome, Berlin
-Correct Answer: Paris
-
-Question Title: Which planet is closest to the sun?
-Options: Earth, Venus, Mercury, Mars
-Correct Answer: Mercury
-` }] } ],
+            history: [{ role: "user", parts: [{ text: `You are a knowledgeable and engaging quiz master. Generate a ${questionRange} Question multiple-choice quiz on the topic: ${topic}. Follow this format strictly: Question Title: [Insert the question here] Options: [Option A, Option B, Option C, Option D] Correct Answer: [Correct answer]` }] }],
             generationConfig: {  
                 temperature: 1,
                 topP: 0.95,
@@ -141,36 +142,38 @@ Correct Answer: Mercury
         });
     }
 
-    async function generateQuiz(topic,questionRange) {
+    async function generateQuiz(topic, questionRange) {
         if (!chat) {
-            await initializeChat(topic,questionRange);
+            await initializeChat(topic, questionRange);
         }
 
         const model = chat;
 
         try {
-            // Show loading indicator
+            // Show loading bar
             document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading-bar').style.display = 'block'; // Show loading bar
+            const loadingProgress = document.getElementById('loading-progress');
+            loadingProgress.style.width = '0%'; // Reset progress
+
+            // Simulate loading progress (this is just for visual effect)
+            const loadingInterval = setInterval(() => {
+                const currentWidth = parseInt(loadingProgress.style.width);
+                if (currentWidth < 100) {
+                    loadingProgress.style.width = (currentWidth + 10) + '%'; // Increase progress
+                }
+            }, 200); // Adjust speed as needed
+
             console.log("Generating quiz for topic:", topic); // Debugging output
 
-            const result = await model.sendMessage(`You are a knowledgeable and engaging quiz master. Generate a  ${questionRange} Question multiple-choice quiz on the topic: ${topic}.
-Follow this format strictly:
-    Question Title: [Insert the question here]
-    Options: [Option A, Option B, Option C, Option D]
-    Correct Answer: [Correct answer]  
-
-BE DIRECT DONT ADD ANY UNNESSARY WORDS  EXAMPLE FORMAT:
-Question Title: What is the capital of France?
-Options: Paris, London, Rome, Berlin
-Correct Answer: Paris
-
-Question Title: Which planet is closest to the sun?
-Options: Earth, Venus, Mercury, Mars
-Correct Answer: Mercury
-`);
+            const result = await model.sendMessage(`You are a knowledgeable and engaging quiz master. Generate a ${questionRange} Question multiple-choice quiz on the topic: ${topic}. Follow this format strictly: Question Title: [Insert the question here] Options: [Option A, Option B, Option C, Option D] Correct Answer: [Correct answer]`);
             const response = await result.response;
 
             console.log("Response received:", response); // Debugging output
+
+            // Clear the loading interval
+            clearInterval(loadingInterval);
+            loadingProgress.style.width = '100%'; // Complete progress
 
             if (response) {
                 const quizText = await response.text();
@@ -183,8 +186,9 @@ Correct Answer: Mercury
             console.error("Error generating quiz:", error);
             displayQuiz("An error occurred while generating the quiz.");
         } finally {
-            // Hide loading indicator
+            // Hide loading indicators
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('loading-bar').style.display = 'none'; // Hide loading bar
         }
     }
 
@@ -227,19 +231,15 @@ Correct Answer: Mercury
 
             const optionsList = document.createElement("ul");
             optionsList.className = "options";
-
-            question.options.forEach(option => {
+            question.options.forEach((option, optionIndex) => {
                 const optionItem = document.createElement("li");
                 const optionInput = document.createElement("input");
                 optionInput.type = "radio";
-                optionInput.name = `question${questionIndex}`;
-                optionInput.value = option; // Option value
-
-                const optionLabel = document.createElement("label");
-                optionLabel.textContent = option;
+                optionInput.name = `question-${questionIndex}`;
+                optionInput.value = option;
 
                 optionItem.appendChild(optionInput);
-                optionItem.appendChild(optionLabel);
+                optionItem.appendChild(document.createTextNode(option));
                 optionsList.appendChild(optionItem);
             });
 
@@ -247,44 +247,10 @@ Correct Answer: Mercury
             quizContainer.appendChild(questionDiv);
         });
 
-        // Show the Submit button after rendering the quiz
-        document.getElementById('submit-quiz-btn').style.display = 'block';
+        document.getElementById("submit-quiz-btn").style.display = "block"; // Show submit button
     }
 
-    function calculateScore() {
-        let score = 0;
-        const scoreOutput = document.getElementById('score-output');
-        scoreOutput.innerHTML = ""; // Clear previous score output
-
-        questions.forEach((question, questionIndex) => {
-            const selectedOption = document.querySelector(`input[name="question${questionIndex}"]:checked`);
-            if (selectedOption && selectedOption.value === question.correctAnswer) {
-                score++;
-            }
-
-            // Display correct answer
-            const answerDiv = document.createElement("div");
-            answerDiv.textContent = `${questionIndex + 1}. ${question.title} - Correct Answer: ${question.correctAnswer}`;
-            scoreOutput.appendChild(answerDiv);
-        });
-
-        scoreOutput.prepend(`Your score: ${score} out of ${questions.length}`);
-    }
-
-    document.getElementById('generate-quiz-btn').addEventListener('click', () => {
-        const topic = document.getElementById('topic-input').value.trim();
-        const questionRange = document.getElementById('question-input').value.trim();
-
-        if (topic && questionRange) {
-    generateQuiz(topic,questionRange);
-} else {
-    alert("Please enter a topic and range before generating a quiz.");
-}
-
-    });
-    const questionInput = document.getElementById('question-input');
-
-   
+ 
     document.getElementById('file-btn').addEventListener('click', () => {
     document.getElementById('file-input').click(); // Trigger file input dialog
 });
@@ -331,9 +297,26 @@ document.getElementById('file-input').addEventListener('change', async () => {
     }
 });
 
+document.getElementById('file-input').addEventListener('change', handleFileUpload);
 
-    document.getElementById('submit-quiz-btn').addEventListener('click', calculateScore);
+    document.getElementById("file-btn").addEventListener("click", () => {
+        document.getElementById("file-input").click();
+    });
+
+    document.getElementById("file-input").addEventListener("change", handleFileUpload);
+
+    document.getElementById("generate-quiz-btn").addEventListener("click", () => {
+        const topic = document.getElementById("topic-input").value;
+        const questionRange = document.getElementById("question-input").value;
+
+        if (topic && questionRange) {
+            generateQuiz(topic, questionRange);
+        } else {
+            alert("Please enter a topic and the number of questions.");
+        }
+    });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 </body>
 </html>

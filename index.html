@@ -54,7 +54,8 @@
     <p id="output-field">Enter a topic or upload a document to generate quiz questions:</p>
     
     <div class="input-group mb-4">
-        <input type="text" id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input">
+        <textarea id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input" rows="4" cols="50"></textarea>
+
         <input type="file" id="file-input" accept=".txt,.pdf" style="display:none;">
         <button id="file-btn" class="btn btn-secondary">Upload File</button>
         <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>

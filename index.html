@@ -127,16 +127,23 @@
         },
     ];
 
-    let questions = []; // Store questions and answers
+   
 
-    async function initializeChat(topic, questionRange) {
-    // Only initialize chat if it hasn't been initialized yet
-    if (!chat) {
-        chat = await genAI.getGenerativeModel({ model: "gemini-1.5-pro", safetySettings }).startChat({
-            history: [{
-                role: "user",
-                parts: [{
-                    text: `You are a knowledgeable and engaging quiz master. Generate a ${questionRange} Question multiple-choice quiz on the topic: ${topic}.
+    async function generateQuiz(topic, questionRange, retries = 3) {
+    let model;
+
+    try {
+        // Show loading indicator
+        document.getElementById('loading').style.display = 'block';
+        console.log("Generating quiz for topic:", topic); // Debugging output
+
+        // Check if chat is already initialized, if not, create it
+        if (!chat) {
+            chat = await genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings }).startChat({
+                history: [{
+                    role: "user",
+                    parts: [{
+                        text: `You are a knowledgeable and engaging quiz master. Generate a ${questionRange} Question multiple-choice quiz on the topic: ${topic}.
 Follow this format strictly. DONT ADD ANY WORDS OR TEXT. FOLLOW THE FORMAT STRICTLY:
     Question Title: [Insert the question here]
     Options: [Option A, Option B, Option C, Option D]
@@ -150,29 +157,18 @@ Correct Answer: Paris
 Question Title: Which planet is closest to the sun?
 Options: Earth, Venus, Mercury, Mars
 Correct Answer: Mercury`
-                }]
-            }],
-            generationConfig: {
-                temperature: 1,
-                topP: 0.95,
-                topK: 64,
-                maxOutputTokens: 8192,
-                responseMimeType: "text/plain",
-            },
-        });
-    }
-}
-
-async function generateQuiz(topic, questionRange, retries = 3) {
-    // Initialize chat if not already done
-    await initializeChat(topic, questionRange);
-
-    const model = chat;
-
-    try {
-        // Show loading indicator
-        document.getElementById('loading').style.display = 'block';
-        console.log("Generating quiz for topic:", topic); // Debugging output
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 1,
+                    topP: 0.95,
+                    topK: 64,
+                    maxOutputTokens: 8192,
+                    responseMimeType: "text/plain",
+                },
+            });
+        }
+        model = chat;
 
         const result = await model.sendMessage(`You are a knowledgeable and engaging quiz master. Generate a ${questionRange} Question multiple-choice quiz on the topic: ${topic}.
 Follow this format strictly. DONT ADD ANY WORDS OR TEXT. FOLLOW THE FORMAT STRICTLY:
@@ -192,7 +188,7 @@ Correct Answer: Mercury`);
         const response = result.response;
 
         // Display the entire response in HTML for debugging
-        document.getElementById('response-output').textContent = JSON.stringify(response, null, 2); // Format as JSON for readability
+        document.getElementById('quiz-output').textContent = JSON.stringify(response, null, 2); // Format as JSON for readability
 
         // Check if the response is valid and contains text
         if (response && response.text) {
@@ -222,10 +218,12 @@ Correct Answer: Mercury`);
 }
 
 
+let questions = []; // Move this to a global scope
+
 
 function renderQuiz(quizText) {
-    // Parse the quizText into a structured format
-    let questions = []; // Clear previous questions
+    // Clear previous questions
+    questions = []; // Reset the questions array
     const inputLines = quizText.split("\n");
 
     let currentQuestion = null;
@@ -304,6 +302,8 @@ function renderQuiz(quizText) {
     }
 }
 
+
+
 document.getElementById('submit-quiz-btn').addEventListener('click', () => {
     const confirmed = confirm("Are you sure you want to submit your quiz?");
     if (confirmed) {
@@ -315,6 +315,13 @@ function calculateScore() {
     let score = 0;
     let unansweredCount = 0; // Track unanswered questions
     const scoreOutput = document.getElementById('score-output');
+
+    // Ensure scoreOutput exists
+    if (!scoreOutput) {
+        console.error("Score output element not found.");
+        return;
+    }
+
     scoreOutput.innerHTML = ""; // Clear previous score output
 
     // Create a container for the results
@@ -326,6 +333,15 @@ function calculateScore() {
     resultTitle.className = 'text-center text-primary mb-3';
     resultTitle.textContent = 'Quiz Results';
     resultContainer.appendChild(resultTitle);
+
+    // Check if questions array is defined and has elements
+    if (!Array.isArray(questions) || questions.length === 0) {
+        const errorMessage = document.createElement('p');
+        errorMessage.className = 'text-danger text-center';
+        errorMessage.textContent = 'No questions available to calculate score.';
+        scoreOutput.appendChild(errorMessage);
+        return;
+    }
 
     // Iterate through the questions to calculate score and display answers
     questions.forEach((question, questionIndex) => {
@@ -395,6 +411,7 @@ function calculateScore() {
     // Append the result container to the score output
     scoreOutput.appendChild(resultContainer);
 }
+
 
     document.getElementById('generate-quiz-btn').addEventListener('click', () => {
         const topic = document.getElementById('topic-input').value.trim();

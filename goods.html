@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333333;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .options li {
+            margin-bottom: 10px;
+        }
+
+        .options input {
+            margin-right: 10px;
+        }
+
+        #loading {
+            color: #007bff;
+        }
+
+        #score-output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+        }
+        #flashcard-output {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center flashcards */
+}
+
+.flashcard {
+    position: relative;
+    width: 250px; /* Increase the width of the flashcard */
+    height: 150px; /* Set a fixed height to give space for content */
+    perspective: 1000px;
+    margin: 10px; /* Add space between cards */
+}
+
+.flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the left */
+    justify-content: center;
+    font-size: 14px;
+    overflow-wrap: break-word; /* Allow word wrapping */
+    padding: 10px; /* Add padding for better text appearance */
+    box-sizing: border-box; /* Include padding in width/height calculations */
+}
+
+.flashcard-front {
+    background-color: #fff;
+}
+
+.flashcard-back {
+    background-color: #f9f9f9;
+    transform: rotateY(180deg); /* Start with back facing */
+}
+
+.flashcard.flipped .flashcard-front {
+    transform: rotateY(180deg);
+}
+
+.flashcard.flipped .flashcard-back {
+    transform: rotateY(0deg);
+}
+
+.flashcard-back, .flashcard-front {
+    transition: transform 0.5s;
+    backface-visibility: hidden; /* Hide backface when flipped */
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center mb-4">AI-Powered Tools</h1>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" id="ai-tools-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="ai-notes-tab" data-bs-toggle="tab" href="#ai-notes" role="tab"
+                    aria-controls="ai-notes" aria-selected="true">AI Notes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ai-summary-tab" data-bs-toggle="tab" href="#ai-summary" role="tab"
+                    aria-controls="ai-summary" aria-selected="false">AI Summary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ai-flash-card-tab" data-bs-toggle="tab" href="#ai-flash-card" role="tab"
+                    aria-controls="ai-flash-card" aria-selected="false">AI Flash Cards</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ai-quizzes-tab" data-bs-toggle="tab" href="#ai-quizzes" role="tab"
+                    aria-controls="ai-quizzes" aria-selected="false">AI Quizzes</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content mt-4" id="ai-tools-tab-content">
+            <!-- AI Notes Section -->
+            <div class="tab-pane fade show active" id="ai-notes" role="tabpanel" aria-labelledby="ai-notes-tab">
+                <h2>AI Notes</h2>
+                <p>Generate AI-powered notes based on your input.</p>
+                <textarea id="notes-input" class="form-control" placeholder="Enter topic for notes..." rows="4"></textarea>
+                <button id="generate-notes-btn" class="btn btn-primary mt-3">Generate Notes</button>
+                <div id="notes-output" class="mt-3"></div>
+            </div>
+
+            <!-- AI Summary Section -->
+            <div class="tab-pane fade" id="ai-summary" role="tabpanel" aria-labelledby="ai-summary-tab">
+                <h2>AI Summary</h2>
+                <p>Summarize content using AI.</p>
+                <textarea id="summary-input" class="form-control" placeholder="Enter text for summary..." rows="4"></textarea>
+                <button id="generate-summary-btn" class="btn btn-primary mt-3">Generate Summary</button>
+                <div id="summary-output" class="mt-3"></div>
+            </div>
+            
+
+            <!-- AI Flash Cards Section -->
+            <div class="tab-pane fade" id="ai-flash-card" role="tabpanel" aria-labelledby="ai-flash-card-tab">
+                <h2>AI Flashcard</h2>
+                <p>Generate flashcards using AI.</p>
+                <textarea id="flashcard-input" class="form-control" placeholder="Enter topic for flashcards..." rows="4"></textarea>
+                <input type="number" id="flashcard-count" class="form-control mt-2" placeholder="Number of flashcards (max 10)" min="1" max="10" value="1"/>
+                <button id="generate-flashcard-btn" class="btn btn-primary mt-3">Generate Flashcards</button>
+                <div id="flashcard-output" class="mt-3"></div>
+            
+            </div>
+
+            <!-- AI Quizzes Section -->
+            <div class="tab-pane fade" id="ai-quizzes" role="tabpanel" aria-labelledby="ai-quizzes-tab">
+                <h1 class="text-center mb-4">AI-Powered Quiz Maker with Lart</h1>
+                <p id="output-field">Enter a topic or upload a document to generate quiz questions:</p>
+                
+                <div class="mb-4">
+                    <label for="topic-input" class="form-label">Enter Topic:</label>
+                    <textarea id="topic-input" class="form-control" placeholder="Enter topic..." aria-label="Topic input" rows="4" cols="50" required></textarea>
+                </div>
+                
+               
+                <div class="mb-4">
+                    <label for="question-input" class="form-label">Input Questions (Max 30):</label>
+            <input type="number" id="question-input" class="form-control" placeholder="Enter your range here..." min="1" max="30" required oninput="this.value = Math.max(1, Math.min(30, this.value));">
+            <small class="form-text text-muted">You can enter a number between 1 and 30.</small>
+            
+            
+                    <small class="form-text text-muted">You can enter up to 30 questions, one per line.</small>
+                </div>
+                <div id="loading-screen" style="display:none; text-align: center; margin-top: 20px;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Scanning Text...</p>
+                </div>
+               
+            
+                <div class="input-group mb-4">
+                    <input type="file" id="file-input" 
+                    accept=".txt,.pdf,.jpg,.png,.jpeg,.bmp,.gif,.tif,.tiff,.webp" 
+                    style="display:none;">
+             
+                    <button id="file-btn" class="btn btn-secondary">Upload File</button>
+                    <button id="generate-quiz-btn" class="btn btn-primary">Generate Quiz</button>
+                </div>
+                
+                
+                <div id="quiz-output"></div>
+                <div id="loading" style="display: none;">Generating quiz, please wait...</div>
+                <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">Submit Answers</button>
+                <div id="score-output"></div>
+            
+                
+       
+            </div>
+        </div>
+    </div>
+
+
+    <script type="importmap">
+        {
+            "imports": {
+                "@google/generative-ai": "https://esm.run/@google/generative-ai"
+            }
+        }
+        </script>
+
+<script type="module" src="generatequiz.js"></script>
+<script type="module" src="generatenotes.js"></script>
+<script type="module" src="generatesummary.js"></script>
+<script type="module" src="generateflashcard.js"></script>
+    <script type="module">
+      
+
+       
+
+        document.getElementById('generate-flash-card-btn').addEventListener('click', () => {
+            const flashCardInput = document.getElementById('flash-card-input').value.trim();
+            document.getElementById('flash-card-output').textContent = `Generated flash cards for: ${flashCardInput}`;
+        });
+        
+    </script>
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

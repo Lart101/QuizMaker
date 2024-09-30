@@ -159,16 +159,20 @@
             </div>
             
 
-            <!-- AI Flash Cards Section -->
-            <div class="tab-pane fade" id="ai-flash-card" role="tabpanel" aria-labelledby="ai-flash-card-tab">
-                <h2>AI Flashcard</h2>
-                <p>Generate flashcards using AI.</p>
-                <textarea id="flashcard-input" class="form-control" placeholder="Enter topic for flashcards..." rows="4"></textarea>
-                <input type="number" id="flashcard-count" class="form-control mt-2" placeholder="Number of flashcards (max 10)" min="1" max="10" value="1"/>
-                <button id="generate-flashcard-btn" class="btn btn-primary mt-3">Generate Flashcards</button>
-                <div id="flashcard-output" class="mt-3"></div>
-            
-            </div>
+         <!-- AI Flash Cards Section -->
+<div class="tab-pane fade" id="ai-flash-card" role="tabpanel" aria-labelledby="ai-flash-card-tab">
+    <h2>AI Flashcard</h2>
+    <p>Generate flashcards using AI.</p>
+    <textarea id="flashcard-input" class="form-control" placeholder="Enter topic for flashcards..." rows="4"></textarea>
+    <input type="number" id="flashcard-count" class="form-control mt-2" placeholder="Number of flashcards (max 12)" min="1" max="12" required oninput="this.value = Math.max(1, Math.min(12, this.value));" />
+    
+    <div class="mb-4">
+        <button id="generate-flashcard-btn" class="btn btn-primary mt-3">Generate Flashcards</button>
+        <div id="flashcard-output" class="mt-3"></div>
+    
+    </div>
+</div>
+
 
             <!-- AI Quizzes Section -->
             <div class="tab-pane fade" id="ai-quizzes" role="tabpanel" aria-labelledby="ai-quizzes-tab">

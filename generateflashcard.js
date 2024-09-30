@@ -138,12 +138,12 @@ function displayFlashcards(flashcardsText) {
 // Event listener for the Generate Flashcards button
 document.getElementById('generate-flashcard-btn').addEventListener('click', () => {
     const topic = document.getElementById('flashcard-input').value.trim();
-    const count = parseInt(document.getElementById('flashcard-count').value, 10);
+    const count = parseInt(document.getElementById('flashcard-count').value, 10); // Use base 10
 
-    if (topic && count > 0 && count <= 10) {
+    if (topic && count > 0 && count <= 12) {
         generateFlashcards(topic, count);
     } else {
-        alert("Please enter a valid topic and a number between 1 and 10.");
+        alert("Please enter a valid topic and a number between 1 and 12.");
     }
 });
 

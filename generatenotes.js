@@ -1,7 +1,9 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+import dotenv from 'dotenv';
 
+dotenv.config();
 
-const API_KEY = 'AIzaSyCW-qGbbyLBerWcUMUu-mAa7-NnSfSrFpc'; 
+const API_KEY = process.env.GOOGLE_API_KEY; 
 const genAI = new GoogleGenerativeAI(API_KEY);
 let chat;
 
@@ -186,11 +188,6 @@ function displayNotes(notesText) {
     // Append the formatted notes to the output
     notesOutput.appendChild(notesContainer);
 }
-
-
-
-
-
 
 function displayError(message, outputElementId) {
     const errorElement = document.getElementById(outputElementId);

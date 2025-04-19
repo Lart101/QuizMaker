@@ -1,7 +1,9 @@
-
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+import dotenv from 'dotenv';
 
-const API_KEY = 'AIzaSyCW-qGbbyLBerWcUMUu-mAa7-NnSfSrFpc'; 
+dotenv.config();
+
+const API_KEY = process.env.GOOGLE_API_KEY; 
 const genAI = new GoogleGenerativeAI(API_KEY);
 let chat;
 
@@ -125,15 +127,6 @@ function displayFlashcards(flashcardsText) {
     // Append the row to the output element
     flashcardOutput.appendChild(flashcardRow);
 }
-
-
-
-
-
-
-
-
-
 
 // Event listener for the Generate Flashcards button
 document.getElementById('generate-flashcard-btn').addEventListener('click', () => {

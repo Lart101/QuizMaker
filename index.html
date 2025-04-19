@@ -260,74 +260,202 @@
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.8);
         }
+
+        /* Score page styles */
+        .score-page {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .quiz-page {
+            display: block;
+        }
+        
+        .back-button {
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background-color: var(--gray-300);
+            transform: translateY(-2px);
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .score-text {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .question-result {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .question-result:hover {
+            transform: translateY(-2px);
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .question-number {
+            background: var(--light);
+            color: var(--primary);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        
+        .correct-answer {
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .wrong-answer {
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .no-answer {
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 class="text-center mb-4">AI-Powered Quiz Maker</h1>
-    <p id="output-field" class="text-center mb-4">Create a personalized quiz by entering a topic or uploading a document</p>
-    
-    <div class="mb-4">
-        <label for="topic-input" class="form-label">Enter Topic:</label>
-        <textarea id="topic-input" class="form-control" placeholder="What would you like to be quizzed on?" aria-label="Topic input" rows="4" cols="50" required></textarea>
-    </div>
-    
-   
-    <div class="mb-4">
-        <label for="question-input" class="form-label">Number of Questions (Max 30):</label>
-        <input type="number" id="question-input" class="form-control" placeholder="Enter number of questions..." min="1" max="30" required oninput="this.value = Math.max(1, Math.min(30, this.value));">
-        <small class="form-text text-muted">Select between 1 and 30 questions for your quiz.</small>
-    </div>
-    
-    <div id="loading-screen" style="display:none; text-align: center; margin-top: 20px;">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <div class="quiz-page">
+        <h1 class="text-center mb-4">AI-Powered Quiz Maker</h1>
+        <p id="output-field" class="text-center mb-4">Create a personalized quiz by entering a topic or uploading a document</p>
+        
+        <div class="mb-4">
+            <label for="topic-input" class="form-label">Enter Topic:</label>
+            <textarea id="topic-input" class="form-control" placeholder="What would you like to be quizzed on?" aria-label="Topic input" rows="4" cols="50" required></textarea>
         </div>
-        <p>Scanning Text...</p>
-    </div>
-   
-    <div class="d-flex gap-2 mb-4 justify-content-center">
-        <input type="file" id="file-input" 
-        accept=".txt,.pdf,.jpg,.png,.jpeg,.bmp,.gif,.tif,.tiff,.webp" 
-        style="display:none;">
- 
-        <button id="file-btn" class="btn btn-secondary">
-            <i class="fas fa-upload me-1"></i> Upload File
-        </button>
-        <button id="generate-quiz-btn" class="btn btn-primary">
-            <i class="fas fa-magic me-1"></i> Generate Quiz
-        </button>
+        
+       
+        <div class="mb-4">
+            <label for="question-input" class="form-label">Number of Questions (Max 30):</label>
+            <input type="number" id="question-input" class="form-control" placeholder="Enter number of questions..." min="1" max="30" required oninput="this.value = Math.max(1, Math.min(30, this.value));">
+            <small class="form-text text-muted">Select between 1 and 30 questions for your quiz.</small>
+        </div>
+        
+        <div id="loading-screen" style="display:none; text-align: center; margin-top: 20px;">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Scanning Text...</p>
+        </div>
+       
+        <div class="d-flex gap-2 mb-4 justify-content-center">
+            <input type="file" id="file-input" 
+            accept=".txt,.pdf,.jpg,.png,.jpeg,.bmp,.gif,.tif,.tiff,.webp" 
+            style="display:none;">
+     
+            <button id="file-btn" class="btn btn-secondary">
+                <i class="fas fa-upload me-1"></i> Upload File
+            </button>
+            <button id="generate-quiz-btn" class="btn btn-primary">
+                <i class="fas fa-magic me-1"></i> Generate Quiz
+            </button>
+        </div>
+        
+        <div id="quiz-output" class="mb-4"></div>
+        <div id="loading" style="display: none;"><i class="fas fa-spinner"></i> Generating quiz, please wait...</div>
+        <div class="d-flex justify-content-center">
+            <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">
+                <i class="fas fa-check-circle me-1"></i> Submit Answers
+            </button>
+        </div>
+        <div id="score-output"></div>
     </div>
     
-    <div id="quiz-output" class="mb-4"></div>
-    <div id="loading" style="display: none;"><i class="fas fa-spinner"></i> Generating quiz, please wait...</div>
-    <div class="d-flex justify-content-center">
-        <button id="submit-quiz-btn" class="btn btn-success mt-3" style="display: none;">
-            <i class="fas fa-check-circle me-1"></i> Submit Answers
+    <div class="score-page">
+        <button class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Quiz
         </button>
+        <div id="score-output"></div>
     </div>
-    <div id="score-output"></div>
 </div>
 
 <script type="importmap">
 {
     "imports": {
-        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        "@google/generative-ai": "https://esm.run/@google/generative-ai",
+        "./config.js": "./config.js"
     }
 }
 </script>
 
 <script type="module">
+   import { API_KEY, OCR_API_KEY } from './config.js';
    import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
-   import { GOOGLE_API_KEY } from './.env.js';
 
-   const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-   let chat;
+const genAI = new GoogleGenerativeAI(API_KEY);
+let chat;
 
-   function displayQuiz(message) {
-      document.getElementById('quiz-output').textContent = message;
-   }
+function displayQuiz(message) {
+document.getElementById('quiz-output').textContent = message;
+}
+
 
 const safetySettings = [
     {
@@ -521,106 +649,92 @@ if (confirmed) {
 });
 
 function calculateScore() {
-let score = 0;
-let unansweredCount = 0; // Track unanswered questions
-const scoreOutput = document.getElementById('score-output');
+    // Switch to score page
+    document.querySelector('.quiz-page').style.display = 'none';
+    document.querySelector('.score-page').style.display = 'block';
+    
+    let score = 0;
+    let unansweredCount = 0;
+    const scoreOutput = document.querySelector('.score-page #score-output');
+    scoreOutput.innerHTML = '';
 
-// Ensure scoreOutput exists
-if (!scoreOutput) {
-    console.error("Score output element not found.");
-    return;
+    // Create score card
+    const scoreCard = document.createElement('div');
+    scoreCard.className = 'score-card';
+    
+    const scoreNumber = document.createElement('div');
+    scoreNumber.className = 'score-number';
+    
+    const scoreText = document.createElement('div');
+    scoreText.className = 'score-text';
+
+    // Calculate score and create result elements for each question
+    questions.forEach((question, index) => {
+        const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+        const isCorrect = selectedOption && selectedOption.value === question.correctAnswer;
+        
+        if (!selectedOption) {
+            unansweredCount++;
+        }
+        if (isCorrect) score++;
+
+        // Create question result element
+        const questionResult = document.createElement('div');
+        questionResult.className = 'question-result';
+        
+        const questionHeader = document.createElement('div');
+        questionHeader.className = 'question-header';
+        
+        const questionNumber = document.createElement('div');
+        questionNumber.className = 'question-number';
+        questionNumber.textContent = index + 1;
+        
+        const questionTitle = document.createElement('div');
+        questionTitle.textContent = question.title;
+        
+        questionHeader.appendChild(questionNumber);
+        questionHeader.appendChild(questionTitle);
+        questionResult.appendChild(questionHeader);
+
+        // Add answer status
+        const answerStatus = document.createElement('div');
+        if (!selectedOption) {
+            answerStatus.className = 'no-answer';
+            answerStatus.innerHTML = '<i class="fas fa-minus-circle"></i> No answer provided';
+        } else if (isCorrect) {
+            answerStatus.className = 'correct-answer';
+            answerStatus.innerHTML = `<i class="fas fa-check-circle"></i> Correct: ${question.correctAnswer}`;
+        } else {
+            answerStatus.className = 'wrong-answer';
+            answerStatus.innerHTML = `<i class="fas fa-times-circle"></i> Your answer: ${selectedOption.value}<br>
+                                    <i class="fas fa-check-circle"></i> Correct answer: ${question.correctAnswer}`;
+        }
+        questionResult.appendChild(answerStatus);
+        scoreOutput.appendChild(questionResult);
+    });
+
+    // Update score card
+    scoreNumber.textContent = `${score}/${questions.length}`;
+    scoreText.textContent = `${Math.round((score/questions.length) * 100)}% Correct`;
+    
+    scoreCard.appendChild(scoreNumber);
+    scoreCard.appendChild(scoreText);
+    scoreOutput.insertBefore(scoreCard, scoreOutput.firstChild);
+
+    // Add warning for unanswered questions if any
+    if (unansweredCount > 0) {
+        const warning = document.createElement('div');
+        warning.className = 'alert alert-warning mt-3';
+        warning.innerHTML = `<i class="fas fa-exclamation-triangle"></i> You have ${unansweredCount} unanswered question${unansweredCount > 1 ? 's' : ''}.`;
+        scoreOutput.insertBefore(warning, scoreCard.nextSibling);
+    }
 }
 
-scoreOutput.innerHTML = ""; // Clear previous score output
-
-// Create a container for the results
-const resultContainer = document.createElement('div');
-resultContainer.className = 'result-container p-4 mb-4 rounded shadow bg-light';
-
-// Add a title to the results
-const resultTitle = document.createElement('h3');
-resultTitle.className = 'text-center text-primary mb-3';
-resultTitle.textContent = 'Quiz Results';
-resultContainer.appendChild(resultTitle);
-
-// Check if questions array is defined and has elements
-if (!Array.isArray(questions) || questions.length === 0) {
-    const errorMessage = document.createElement('p');
-    errorMessage.className = 'text-danger text-center';
-    errorMessage.textContent = 'No questions available to calculate score.';
-    scoreOutput.appendChild(errorMessage);
-    return;
-}
-
-// Iterate through the questions to calculate score and display answers
-questions.forEach((question, questionIndex) => {
-    const selectedOption = document.querySelector(`input[name="question${questionIndex}"]:checked`);
-    const isCorrect = selectedOption && selectedOption.value === question.correctAnswer;
-
-    // Check if the question was unanswered
-    if (!selectedOption) {
-        unansweredCount++;
-    }
-
-    // Increment score if the answer is correct
-    if (isCorrect) score++;
-
-    // Create a card for each question result
-    const questionCard = document.createElement('div');
-    questionCard.className = 'question-card card mb-3 border';
-
-    // Card header for the question title
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'card-header bg-info text-white';
-    cardHeader.textContent = `${questionIndex + 1}. ${question.title}`;
-    questionCard.appendChild(cardHeader);
-
-    // Card body to show the correct answer and highlight user's choice
-    const cardBody = document.createElement('div');
-    cardBody.className = 'card-body';
-
-    // Display selected answer (if any) and whether it's correct or incorrect
-    if (selectedOption) {
-        const selectedAnswer = document.createElement('p');
-        selectedAnswer.className = isCorrect ? 'text-success' : 'text-danger';
-        selectedAnswer.innerHTML = `Your Answer: <strong>${selectedOption.value}</strong> 
-        ${isCorrect ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>'}`;
-        cardBody.appendChild(selectedAnswer);
-    } else {
-        const noAnswer = document.createElement('p');
-        noAnswer.className = 'text-warning';
-        noAnswer.innerHTML = '<strong>You did not select an answer.</strong>';
-        cardBody.appendChild(noAnswer);
-    }
-
-    // Display the correct answer
-    const correctAnswer = document.createElement('p');
-    correctAnswer.className = 'text-info';
-    correctAnswer.innerHTML = `Correct Answer: <strong>${question.correctAnswer}</strong>`;
-    cardBody.appendChild(correctAnswer);
-
-    questionCard.appendChild(cardBody);
-    resultContainer.appendChild(questionCard);
+// Add event listener for the back button
+document.querySelector('.back-button').addEventListener('click', () => {
+    document.querySelector('.score-page').style.display = 'none';
+    document.querySelector('.quiz-page').style.display = 'block';
 });
-
-// Add a summary of the score at the top
-const scoreSummary = document.createElement('div');
-scoreSummary.className = 'score-summary alert alert-primary text-center fw-bold';
-scoreSummary.textContent = `Your score: ${score} out of ${questions.length}`;
-resultContainer.prepend(scoreSummary);
-
-// Show a warning if there are unanswered questions
-if (unansweredCount > 0) {
-    const unansweredWarning = document.createElement('div');
-    unansweredWarning.className = 'alert alert-warning text-center fw-bold';
-    unansweredWarning.textContent = `You have ${unansweredCount} unanswered question(s). Please review your answers before submitting.`;
-    resultContainer.prepend(unansweredWarning);
-}
-
-// Append the result container to the score output
-scoreOutput.appendChild(resultContainer);
-}
-
 
 document.getElementById('generate-quiz-btn').addEventListener('click', () => {
     const topic = document.getElementById('topic-input').value.trim();
@@ -650,9 +764,8 @@ if (!file) {
     return;
 }
 
-const apiKey = "K87789744488957"; // Your OCR.space API Key
 const formData = new FormData();
-formData.append("apikey", apiKey);
+formData.append("apikey", OCR_API_KEY);
 formData.append("file", file);
 
 const loadingIndicator = document.getElementById('loading-screen');
